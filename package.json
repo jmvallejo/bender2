@@ -10,7 +10,10 @@
     "start": "nodemon --exec babel-node src/index.js",
     "lint": "standard",
     "lint:fix": "standard --fix",
-    "test": "jest"
+    "test": "jest --watch"
+  },
+  "standard": {
+    "env": ["jest"]
   },
   "dependencies": {
     "cors": "^2.8.5",
