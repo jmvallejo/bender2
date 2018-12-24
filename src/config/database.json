@@ -1,0 +1,12 @@
+{
+  "development": {
+    "host": "mongodb://localhost",
+    "port": 27017,
+    "dbName": "bender2"
+  },
+  "test": {
+    "host": "mongodb://localhost",
+    "port": 27017,
+    "dbName": "bender2test"
+  }
+}
