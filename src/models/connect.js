@@ -11,6 +11,7 @@ export const getMongoURI = () => {
 }
 
 const connect = async () => {
+  mongoose.Promise = Promise
   const uri = getMongoURI()
   await mongoose.connect(
     uri,

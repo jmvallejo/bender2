@@ -80,38 +80,32 @@ describe('User model', () => {
       User.remove({}, () => done())
     })
 
-    it('saves the user correctly', done => {
+    it('saves the user correctly', () => {
       const user = new User({
         email,
         password,
         name
       })
 
-      user.save(err => {
-        expect(err).toBeNull()
-        done()
-      })
+      return expect(user.save()).resolves.toBeTruthy()
     })
 
-    it('fails to save a user with the same email', done => {
+    it('fails to save a user with the same email', async () => {
       const user = new User({
         email,
         password,
         name
       })
 
-      user.save(err => {
-        expect(err).toBeNull()
-        const user2 = new User({
-          email,
-          password,
-          name
-        })
-        user2.save(err => {
-          expect(err).toBeTruthy()
-          done()
-        })
+      const user2 = new User({
+        email,
+        password,
+        name
       })
+
+      const result1 = await user.save()
+      expect(result1).toBeTruthy()
+      return expect(user2.save()).rejects.toBeTruthy()
     })
   })
 
