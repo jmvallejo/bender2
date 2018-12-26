@@ -1,6 +1,22 @@
 import User, { hashPassword, comparePassword } from './user'
+import {
+  connectMongoose,
+  disconnectMongoose,
+  startServer,
+  stopServer
+} from '../config/mongoMemoryServerSetup'
 
 describe('User model', () => {
+  beforeAll(async () => {
+    await startServer()
+    await connectMongoose()
+  })
+
+  afterAll(async () => {
+    await disconnectMongoose()
+    await stopServer()
+  })
+
   describe('validations', () => {
     describe('email', () => {
       it('should be invalid if email is empty', done => {
@@ -55,20 +71,49 @@ describe('User model', () => {
     })
   })
 
-  // describe('saving a user', () => {
-  //   it('saves the user correctly', done => {
-  //     const user = new User({
-  //       email: 'email@somewhere.com',
-  //       password: 'password',
-  //       name: 'some-guy'
-  //     })
+  describe('saving a user', () => {
+    const email = 'email@somewhere.com'
+    const password = 'password'
+    const name = 'some-guy'
 
-  //     user.save(err => {
-  //       expect(err).not.toBeDefined()
-  //       done()
-  //     })
-  //   })
-  // })
+    beforeEach(done => {
+      User.remove({}, () => done())
+    })
+
+    it('saves the user correctly', done => {
+      const user = new User({
+        email,
+        password,
+        name
+      })
+
+      user.save(err => {
+        expect(err).toBeNull()
+        done()
+      })
+    })
+
+    it('fails to save a user with the same email', done => {
+      const user = new User({
+        email,
+        password,
+        name
+      })
+
+      user.save(err => {
+        expect(err).toBeNull()
+        const user2 = new User({
+          email,
+          password,
+          name
+        })
+        user2.save(err => {
+          expect(err).toBeTruthy()
+          done()
+        })
+      })
+    })
+  })
 
   describe('helper functions', () => {
     const plaintext = 'some-password'

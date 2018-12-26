@@ -1,5 +1,5 @@
-const { startAndConnectToServer } = require('./mongoMemoryServerSetup')
+const { startServer } = require('./mongoMemoryServerSetup')
 
 module.exports = async () => {
-  await startAndConnectToServer()
+  await startServer()
 }

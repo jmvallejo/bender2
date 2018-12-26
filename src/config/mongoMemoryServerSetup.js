@@ -5,18 +5,27 @@ const mongod = new MongoMemoryServer({
   autoStart: false
 })
 
-module.exports.startAndConnectToServer = async () => {
+let mongoUri = null
+
+module.exports.startServer = async () => {
   if (!mongod.isRunning) {
     await mongod.start()
   }
-  const mongoUri = await mongod.getConnectionString()
-  await mongoose.connect(
-    mongoUri,
-    { useNewUrlParser: true }
-    )
+  mongoUri = await mongod.getConnectionString()
 }
 
 module.exports.stopServer = async () => {
-  await mongoose.disconnect()
   await mongod.stop()
+}
+
+module.exports.connectMongoose = async () => {
+  mongoose.Promise = Promise
+  await mongoose.connect(
+    mongoUri,
+    { useNewUrlParser: true }
+  )
+}
+
+module.exports.disconnectMongoose = async () => {
+  await mongoose.disconnect()
 }
