@@ -55,6 +55,21 @@ describe('User model', () => {
     })
   })
 
+  // describe('saving a user', () => {
+  //   it('saves the user correctly', done => {
+  //     const user = new User({
+  //       email: 'email@somewhere.com',
+  //       password: 'password',
+  //       name: 'some-guy'
+  //     })
+
+  //     user.save(err => {
+  //       expect(err).not.toBeDefined()
+  //       done()
+  //     })
+  //   })
+  // })
+
   describe('helper functions', () => {
     const plaintext = 'some-password'
 
