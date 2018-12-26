@@ -22,7 +22,7 @@ module.exports.connectMongoose = async () => {
   mongoose.Promise = Promise
   await mongoose.connect(
     mongoUri,
-    { useNewUrlParser: true }
+    { useNewUrlParser: true, useCreateIndex: true }
   )
 }
 

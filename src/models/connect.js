@@ -15,7 +15,7 @@ const connect = async () => {
   const uri = getMongoURI()
   await mongoose.connect(
     uri,
-    { useNewUrlParser: true }
+    { useNewUrlParser: true, useCreateIndex: true }
   )
 }
 
