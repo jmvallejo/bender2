@@ -1,5 +1,7 @@
 import { Schema, model } from 'mongoose'
 import bcrypt from 'bcryptjs'
+import uuidv4 from 'uuid/v4'
+import moment from 'moment'
 
 const SALT_WORK_FACTOR = 10
 
@@ -56,7 +58,9 @@ const userSchema = new Schema(
     password: { type: String, required: true },
     name: { type: String, required: true },
     isAdmin: { type: Boolean, required: true, default: false },
-    isApproved: { type: Boolean, required: true, default: false }
+    isApproved: { type: Boolean, required: true, default: false },
+    token: String,
+    tokenExpiryDate: Date
   },
   {
     timestamps: true
@@ -77,6 +81,14 @@ userSchema.pre('save', function (next) {
 
 userSchema.methods.comparePassword = function (candidatePassword) {
   return comparePassword(candidatePassword, this.password)
+}
+
+userSchema.methods.generateToken = function () {
+  if (!this.token) {
+    this.token = uuidv4()
+  }
+  this.tokenExpiryDate = moment().add(30, 'days').toDate()
+  return this.save()
 }
 
 export default model('User', userSchema)

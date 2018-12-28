@@ -107,6 +107,18 @@ describe('User model', () => {
       expect(result1).toBeTruthy()
       return expect(user2.save()).rejects.toBeTruthy()
     })
+
+    it('generates a token correctly', async () => {
+      const user = new User({
+        email,
+        password,
+        name
+      })
+
+      const savedUser = await user.generateToken()
+      expect(savedUser.token).toBeTruthy()
+      expect(savedUser.tokenExpiryDate).toBeTruthy()
+    })
   })
 
   describe('helper functions', () => {
