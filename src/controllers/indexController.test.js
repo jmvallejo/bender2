@@ -1,6 +1,6 @@
-import mockingoose from 'mockingoose'
 import request from 'supertest'
 import app from '../app'
+import User from '../models/user'
 
 describe('indexController', () => {
   describe('signup', () => {
@@ -13,13 +13,9 @@ describe('indexController', () => {
       name
     }
 
-    beforeEach(() => {
-      mockingoose.resetAll()
-    })
-
     describe('saving user succeeds', () => {
       it('should respond with 200', () => {
-        mockingoose.User.toReturn({ ...data }, 'save')
+        User.prototype.save = jest.fn(() => new Promise(resolve => resolve({ ...data })))
         return request(app)
           .post('/signup')
           .send(data)
@@ -30,14 +26,14 @@ describe('indexController', () => {
     describe('saving user fails', () => {
       const err = new Error('an-error')
       it('should respond with 400', () => {
-        mockingoose.User.toReturn(new Error(err), 'save')
+        User.prototype.save = jest.fn(() => new Promise((resolve, reject) => reject(err)))
         return request(app)
           .post('/signup')
           .send(data)
           .expect(400)
           .then(response => {
             const { text } = response
-            expect(text).toEqual(err.toString())
+            expect(text).toEqual(err.message)
           })
       })
     })
