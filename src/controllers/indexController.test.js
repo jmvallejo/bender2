@@ -38,4 +38,61 @@ describe('indexController', () => {
       })
     })
   })
+
+  describe('login', () => {
+    const token = 'a-token'
+    const email = 'test@test.com'
+    const password = 'a-password'
+    const name = 'a-name'
+    const data = {
+      email,
+      password
+    }
+    
+    it('should respond with 200 and a token when email and password are correct', () => {
+      const user = new User({ ...data, name, token })
+      User.findOne = jest.fn(() => new Promise(resolve => resolve(user)))
+      User.prototype.comparePassword = jest.fn(() => new Promise(resolve => resolve(true)))
+      User.prototype.generateToken = jest.fn(() => new Promise(resolve => resolve(user)))
+      return request(app)
+        .post('/login')
+        .send(data)
+        .expect(200)
+        .then(response => {
+          const { body: { token: returnedToken } } = response
+          expect(returnedToken).toEqual(token)
+          expect(User.findOne).toHaveBeenCalledWith({ email })
+          expect(User.prototype.comparePassword).toHaveBeenCalledWith(password)
+          expect(User.prototype.generateToken).toHaveBeenCalled()
+        })
+    })
+
+    it('should respond with 401 when password is not correct', () => {
+      const user = new User({ ...data, name, token })
+      User.findOne = jest.fn(() => new Promise(resolve => resolve(user)))
+      User.prototype.comparePassword = jest.fn(() => new Promise(resolve => resolve(false)))
+      User.prototype.generateToken = jest.fn(() => new Promise(resolve => resolve(user)))
+      return request(app)
+        .post('/login')
+        .send(data)
+        .expect(401)
+        .then(() => {
+          expect(User.findOne).toHaveBeenCalledWith({ email })
+          expect(User.prototype.comparePassword).toHaveBeenCalledWith(password)
+          expect(User.prototype.generateToken).not.toHaveBeenCalled()
+        })
+    })
+
+    it('should respond with 401 when email does not exist', () => {
+      const user = new User({ ...data, name, token })
+      User.findOne = jest.fn(() => new Promise(resolve => resolve(null)))
+      return request(app)
+        .post('/login')
+        .send(data)
+        .expect(401)
+        .then(() => {
+          expect(User.findOne).toHaveBeenCalledWith({ email })
+        })
+    })
+  })
 })
