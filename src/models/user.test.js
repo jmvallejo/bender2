@@ -1,3 +1,4 @@
+import moment from 'moment'
 import User, { hashPassword, comparePassword } from './user'
 import {
   connectMongoose,
@@ -71,7 +72,7 @@ describe('User model', () => {
     })
   })
 
-  describe('saving a user', () => {
+  describe('methods', () => {
     const email = 'email@somewhere.com'
     const password = 'password'
     const name = 'some-guy'
@@ -118,6 +119,58 @@ describe('User model', () => {
       const savedUser = await user.generateToken()
       expect(savedUser.token).toBeTruthy()
       expect(savedUser.tokenExpiryDate).toBeTruthy()
+    })
+  })
+
+  describe('statics', () => {
+    const email = 'email@somewhere.com'
+    const password = 'password'
+    const name = 'some-guy'
+    const token = 'some-token'
+    const oldDate = moment().subtract(1, 'days').toDate()
+
+    beforeEach(done => {
+      User.remove({}, () => done())
+    })
+
+    describe('findByToken', () => {
+      it('returns a user with a matching token and valid expiry date', async () => {
+        const user = await User.create({
+          email,
+          password,
+          name
+        })
+        await user.generateToken()
+        expect(user.token).toBeTruthy()
+        const foundUser = await User.findByToken(user.token)
+        expect(foundUser).toBeTruthy()
+      })
+
+      it('returns null with a matching token and past expiry date', async () => {
+        const user = await User.create({
+          email,
+          password,
+          name,
+          token,
+          tokenExpiryDate: oldDate
+        })
+        expect(user.token).toBeTruthy()
+        expect(user.tokenExpiryDate).toBeTruthy()
+        const foundUser = await User.findByToken(user.token)
+        expect(foundUser).toBeNull()
+      })
+
+      it('returns null when token does not exist', async () => {
+        const user = await User.create({
+          email,
+          password,
+          name
+        })
+        expect(user.token).toBeFalsy()
+        expect(user.tokenExpiryDate).toBeFalsy()
+        const foundUser = await User.findByToken(token)
+        expect(foundUser).toBeNull()
+      })
     })
   })
 

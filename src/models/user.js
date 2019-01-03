@@ -83,6 +83,19 @@ userSchema.methods.comparePassword = function (candidatePassword) {
   return comparePassword(candidatePassword, this.password)
 }
 
+userSchema.statics.findByToken = async function (token) {
+  const user = await this.findOne({ token })
+  if (!user) {
+    return null
+  }
+  // Compare date to check if token is still valid
+  const { tokenExpiryDate } = user
+  if (moment(tokenExpiryDate) < moment()) {
+    return null
+  }
+  return user
+}
+
 userSchema.methods.generateToken = function () {
   if (!this.token) {
     this.token = uuidv4()
