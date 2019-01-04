@@ -49,8 +49,8 @@ describe('indexController', () => {
       password
     }
     
-    it('should respond with 200 and a token when email and password are correct', () => {
-      const user = new User({ ...data, name, token })
+    it('should respond with 200 and a token when email and password are correct and user is approved', () => {
+      const user = new User({ ...data, name, token, isApproved: true })
       User.findOne = jest.fn(() => new Promise(resolve => resolve(user)))
       User.prototype.comparePassword = jest.fn(() => new Promise(resolve => resolve(true)))
       User.prototype.generateToken = jest.fn(() => new Promise(resolve => resolve(user)))
@@ -67,8 +67,24 @@ describe('indexController', () => {
         })
     })
 
-    it('should respond with 401 when password is not correct', () => {
-      const user = new User({ ...data, name, token })
+    it('should respond with 401 when user is not approved', () => {
+      const user = new User({ ...data, name, token, isApproved: false })
+      User.findOne = jest.fn(() => new Promise(resolve => resolve(user)))
+      User.prototype.comparePassword = jest.fn(() => new Promise(resolve => resolve(true)))
+      User.prototype.generateToken = jest.fn(() => new Promise(resolve => resolve(user)))
+      return request(app)
+        .post('/login')
+        .send(data)
+        .expect(401)
+        .then(() => {
+          expect(User.findOne).toHaveBeenCalledWith({ email })
+          expect(User.prototype.comparePassword).not.toHaveBeenCalledWith(password)
+          expect(User.prototype.generateToken).not.toHaveBeenCalled()
+        })
+    })
+
+    it('should respond with 401 when password is not correct and user is approved', () => {
+      const user = new User({ ...data, name, token, isApproved: true })
       User.findOne = jest.fn(() => new Promise(resolve => resolve(user)))
       User.prototype.comparePassword = jest.fn(() => new Promise(resolve => resolve(false)))
       User.prototype.generateToken = jest.fn(() => new Promise(resolve => resolve(user)))

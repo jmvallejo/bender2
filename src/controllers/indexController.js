@@ -16,7 +16,7 @@ export const signup = (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body
   let user = await User.findOne({ email })
-  if (!user) {
+  if (!user || !user.isApproved) {
     return res.sendStatus(401)
   }
   const isMatch = await user.comparePassword(password)
