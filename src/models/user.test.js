@@ -120,6 +120,17 @@ describe('User model', () => {
       expect(savedUser.token).toBeTruthy()
       expect(savedUser.tokenExpiryDate).toBeTruthy()
     })
+
+    it('archives correctly', async () => {
+      const user = new User({
+        email,
+        password,
+        name
+      })
+
+      const archivedUser = await user.archive()
+      expect(archivedUser.archived).toBeTruthy()
+    })
   })
 
   describe('statics', () => {
@@ -160,6 +171,20 @@ describe('User model', () => {
         expect(foundUser).toBeNull()
       })
 
+      it('returns null when user is archived', async () => {
+        const user = await User.create({
+          email,
+          password,
+          name
+        })
+        await user.generateToken()
+        expect(user.token).toBeTruthy()
+        await user.archive()
+        expect(user.archived).toBeTruthy()
+        const foundUser = await User.findByToken(user.token)
+        expect(foundUser).toBeNull()
+      })
+
       it('returns null when token does not exist', async () => {
         const user = await User.create({
           email,
@@ -170,6 +195,31 @@ describe('User model', () => {
         expect(user.tokenExpiryDate).toBeFalsy()
         const foundUser = await User.findByToken(token)
         expect(foundUser).toBeNull()
+      })
+    })
+
+    describe('list', () => {
+      it('lists all unarchived users', async () => {
+        const user1 = await User.create({
+          email: 1 + email,
+          password,
+          name
+        })
+        const user2 = await User.create({
+          email: 2 + email,
+          password,
+          name
+        })
+        const user3 = await User.create({
+          email: 3 + email,
+          password,
+          name
+        })
+        await user1.archive()
+        expect(user1.archived).toBeTruthy()
+        const expectedUsers = [user2.toObject(), user3.toObject()]
+        const users = await User.list()
+        expect(users).toMatchObject(expectedUsers)
       })
     })
   })

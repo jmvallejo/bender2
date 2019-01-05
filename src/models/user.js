@@ -60,7 +60,8 @@ const userSchema = new Schema(
     isAdmin: { type: Boolean, required: true, default: false },
     isApproved: { type: Boolean, required: true, default: false },
     token: String,
-    tokenExpiryDate: Date
+    tokenExpiryDate: Date,
+    archived: { type: Boolean, default: false }
   },
   {
     timestamps: true
@@ -84,7 +85,7 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 }
 
 userSchema.statics.findByToken = async function (token) {
-  const user = await this.findOne({ token })
+  const user = await this.findOne({ token, archived: false })
   if (!user) {
     return null
   }
@@ -96,11 +97,20 @@ userSchema.statics.findByToken = async function (token) {
   return user
 }
 
+userSchema.statics.list = function () {
+  return this.find({ archived: false })
+}
+
 userSchema.methods.generateToken = function () {
   if (!this.token) {
     this.token = uuidv4()
   }
   this.tokenExpiryDate = moment().add(30, 'days').toDate()
+  return this.save()
+}
+
+userSchema.methods.archive = function () {
+  this.archived = true
   return this.save()
 }
 
