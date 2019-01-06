@@ -68,7 +68,7 @@ const userSchema = new Schema(
   }
 )
 
-userSchema.pre('save', function (next) {
+userSchema.pre('save', function(next) {
   // only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) return next()
 
@@ -80,11 +80,11 @@ userSchema.pre('save', function (next) {
     .catch(err => next(err))
 })
 
-userSchema.methods.comparePassword = function (candidatePassword) {
+userSchema.methods.comparePassword = function(candidatePassword) {
   return comparePassword(candidatePassword, this.password)
 }
 
-userSchema.statics.findByToken = async function (token) {
+userSchema.statics.findByToken = async function(token) {
   const user = await this.findOne({ token, archived: false })
   if (!user) {
     return null
@@ -97,19 +97,29 @@ userSchema.statics.findByToken = async function (token) {
   return user
 }
 
-userSchema.statics.list = function () {
+userSchema.statics.findActiveById = async function(_id) {
+  const user = await this.findOne({ _id, archived: false })
+  if (!user) {
+    return null
+  }
+  return user
+}
+
+userSchema.statics.list = function() {
   return this.find({ archived: false })
 }
 
-userSchema.methods.generateToken = function () {
+userSchema.methods.generateToken = function() {
   if (!this.token) {
     this.token = uuidv4()
   }
-  this.tokenExpiryDate = moment().add(30, 'days').toDate()
+  this.tokenExpiryDate = moment()
+    .add(30, 'days')
+    .toDate()
   return this.save()
 }
 
-userSchema.methods.archive = function () {
+userSchema.methods.archive = function() {
   this.archived = true
   return this.save()
 }

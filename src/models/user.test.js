@@ -198,6 +198,30 @@ describe('User model', () => {
       })
     })
 
+    describe('findActiveById', () => {
+      it('returns a user with a matching id', async () => {
+        const user = await User.create({
+          email,
+          password,
+          name
+        })
+        const foundUser = await User.findActiveById(user._id)
+        expect(foundUser).toBeTruthy()
+        expect(foundUser._id).toEqual(user._id)
+      })
+
+      it('returns null when user is archived', async () => {
+        const user = await User.create({
+          email,
+          password,
+          name
+        })
+        await user.archive()
+        const foundUser = await User.findActiveById(user._id)
+        expect(foundUser).toBeNull()
+      })
+    })
+
     describe('list', () => {
       it('lists all unarchived users', async () => {
         const user1 = await User.create({
