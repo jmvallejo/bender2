@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import * as indexController from '../controllers/indexController'
 
-// Create default router
+// Create router
 const router = Router()
 
 // Define routes

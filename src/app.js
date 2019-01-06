@@ -1,8 +1,9 @@
 import 'dotenv/config'
 import express from 'express'
-import router from './routes/index'
 import cors from 'cors'
 import bodyParser from 'body-parser'
+import indexRouter from './routes/index'
+import usersRouter from './routes/users'
 
 const app = express()
 
@@ -13,7 +14,8 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-// Attach router
-app.use('/', router)
+// Attach routers
+app.use('/', indexRouter)
+app.use('/user', usersRouter)
 
 export default app
