@@ -9,5 +9,8 @@ const router = Router()
 router.use(authenticate)
 
 router.get('/', usersController.list)
+router.get('/:userId', usersController.view)
+router.put('/:userId', usersController.update)
+router.delete('/:userId', usersController.archive)
 
 export default router

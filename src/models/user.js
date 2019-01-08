@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+import { Schema, model, Types } from 'mongoose'
 import bcrypt from 'bcryptjs'
 import uuidv4 from 'uuid/v4'
 import moment from 'moment'
@@ -98,6 +98,9 @@ userSchema.statics.findByToken = async function(token) {
 }
 
 userSchema.statics.findActiveById = async function(_id) {
+  if (!Types.ObjectId.isValid(_id)) {
+    return null
+  }
   const user = await this.findOne({ _id, archived: false })
   if (!user) {
     return null
